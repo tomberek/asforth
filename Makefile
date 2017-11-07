@@ -70,6 +70,29 @@ atmega328p.verify: PART=m328p
 atmega328p.eeprom: PART=m328p
 
 
+atmega32u4 : PART=atmega32u4
+atmega32u4 : TARGET = atmega32u4
+atmega32u4 : MCU=avr5
+atmega32u4 : AVR_FREQ = 16000000L 
+atmega32u4 : LDSECTION  = --section-start=.text=0x0
+atmega32u4 : $(PROGRAM)atmega32u4.hex
+atmega32u4.o :  MCU=atmega32u4
+atmega32u4.elf :  MCU=avr5
+atmega32u4.hex :  MCU=avr5
+atmega32u4.eep.hex :  MCU=avr5
+atmega32u4.era :  PART=atmega32u4
+atmega32u4.bak :  PART=atmega32u4
+atmega32u4.wfuse : PART=atmega32u4
+atmega32u4.wfuse : LFUSE=0xFF
+atmega32u4.wfuse : HFUSE=0xD9
+atmega32u4.wfuse : EFUSE=0x05
+atmega32u4.rfuse: PART=atmega32u4
+atmega32u4.verify: PART=atmega32u4
+atmega32u4.eeprom: PART=atmega32u4
+
+# TARGET CPU
+TARGET=atmega32u4
+
 # ASFORTH VERSION TO USE
 # 'code' for trunk and x.y for the releases (i.e 1.0)
 #VERSION=1.1
@@ -81,8 +104,8 @@ CORE=core
 # PROGRAMMER CONFIGURATION
 # ------------------------
 
-PROGRAMMER?=usbtiny
-PORT?=/dev/ttyUSB0
+PROGRAMMER?=avr109
+PORT?=/dev/ttyACM0
 
 AVRDUDE=avrdude
 AVRDUDE_FLAGS= -P $(PORT) -c $(PROGRAMMER)
@@ -91,24 +114,26 @@ AVRDUDE_FLAGS= -P $(PORT) -c $(PROGRAMMER)
 # ASSEMBLER TO USE
 # ----------------
 
-AS_INCLUDE=  -I $(CORE) -I $(CORE)/drivers -I $(CORE)/devices/$(MCU) -I words
+AS_INCLUDE=  -I $(CORE) -I $(CORE)/drivers -I $(CORE)/devices/$(TARGET) -I words
 
 # Override is only needed by avr-lib build system.
-LDSECTION  = --section-start=.text=0x0
+LDSECTION= --section-start=.text=0x0
 
-override ASFLAGS  = -v -Wall -g3 -gdwarf-2 -mmcu=$(MCU) -al
+override ASFLAGS  = -v -Wall -g3 -gdwarf-2 -mmcu=avr5 -al
 override LDFLAGS  = $(LDSECTION) -v -Map=map.txt -mavr5 
 
-ASM = avr-as $(ASFLAGS) $(AS_INCLUDE)
-LINK = avr-ld $(LDFLAGS)
+ASM=avr-as $(ASFLAGS) $(AS_INCLUDE)
+LINK=avr-ld $(LDFLAGS)
 	
-INCS = $(CORE)/*.inc $(CORE)/*.S $(CORE)/drivers/*.S $(CORE)/devices/atmega328p/*.S
+INCS= $(CORE)/*.inc $(CORE)/*.S $(CORE)/drivers/*.S $(CORE)/devices/$(TARGET)/*.S
 
 # Assemble the target
 atmega328p.o : atmega328p.S $(INCS)
 	@echo "Producing object files for ATMEL $*" 
 	$(ASM) -o $@ atmega328p.S > asout.txt
-
+atmega32u4.o : atmega32u4.S $(INCS)
+	@echo "Producing object files for ATMEL $*" 
+	$(ASM) -o $@ atmega32u4.S > asout.txt
 	
 # link the target
 %.elf : %.o
@@ -175,7 +200,7 @@ atmega328p.o : atmega328p.S $(INCS)
 
 # Cleans everything
 clean :
-	rm -f *.hex ; rm -f *.eep.hex ; rm -f *.lst ; rm -f *.map ; rm -f *.o
+	rm -f *.hex ; rm -f *.eep.hex ; rm -f *.lst ; rm -f *.map ; rm -f *.o ; rm -f asout.txt
 
 # All other rules are target specific and must be typed one by one
 # as shown in the top.
