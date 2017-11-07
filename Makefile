@@ -145,8 +145,8 @@ atmega32u4.o : atmega32u4.S $(INCS)
 %.hex : %.elf
 	@echo "Producing hex files for ATMEL $*"
 	avr-objcopy -O ihex -R .eeprom -R .data $^ $@
-	sed -i '/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/d' atmega328p.hex
-	sed -i '/00000000000000000000000000000000/d' atmega328p.hex
+	sed -i '/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/d' $@
+	sed -i '/00000000000000000000000000000000/d' $@
 
 # make eep target
 %.eep.hex : %.elf
